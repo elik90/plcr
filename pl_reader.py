@@ -7,6 +7,17 @@ import pandas as pd
 ext = ('.mp3', '.wav', '.flac', '.aac', '.ogg')
 
 # READ USER INPUT SPECIFIED FILE AND ASSIGN LINES THAT END WITH AUDIO EXTENSION INTO audio_lines ARRAY
+
+class Track:
+    def __init__(self):
+        self.title = file    #strip ext and track number
+        self.folder = 
+
+
+    def 
+
+
+
 file_name = input("Enter the full file path for the m3u8 file you wish to create an SQL DB:  \n> ")
 with open(file_name) as input_file:
     playlist_byline = input_file.read().splitlines()
@@ -15,6 +26,7 @@ with open(file_name) as input_file:
 for line in playlist_byline:
     if line.endswith(ext):
         audio_lines.append(line)
+print(audio_lines)
 
 # CREATE playlist_dict WITH KEY:VALUE AS artist/album:track 
 playlist_dict = {}
@@ -29,12 +41,16 @@ for i in audio_lines:
 
 
 
+
+
+
+
 # 
 pd.set_option('display.max_colwidth', None)
 playlist_df = pd.DataFrame(playlist_dict.items(), columns = ["Folder", "Track"])
 
 # SPLIT ARTIST FROM ALBUM
-playlist_df[['Artist', 'Album']] = playlist_df.Folder.str.split("-", expand = True)
+#playlist_df[['Artist', 'Album']] = playlist_df.Folder.str.split("-", expand = True)
 
 print("________________________________")
 print(playlist_df)
