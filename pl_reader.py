@@ -1,7 +1,9 @@
 import os.path
 import pandas as pd
 import re
+import psycopg2
 from psycopg2 import OperationalError
+
 # Script to open m3u8 files and pull folder name and title
 # Folder name (Artist - Album) then needs to get split into Artist / Album
 # Artist, Album, Title should all be entered into sql DB
@@ -19,7 +21,7 @@ class Track:
         print(self.artist + " - " + self.album + " - " + self.title)
 
     def __str__(self):
-            return 'aowiejfoiajwoeifjaoiwejfoiawjef{} - {} - {}'.format(self.artist, self.album, self.title)
+            return '{} - {} - {}'.format(self.artist, self.album, self.title)
 
 
 
@@ -33,6 +35,8 @@ for line in playlist_byline:
         audio_lines.append(line)
 
 #print(audio_lines)
+print("=========================================================")
+print("this is audio lines:")
 print(*audio_lines, sep = "\n") 
 
 playlist = []
@@ -78,9 +82,9 @@ for line in audio_lines:
 
 
 #print(track_dict)
-print("________________________________")
-print(playlist)
-
+#print(playlist)
+print("=========================================================")
+print("this is playlist:")
 print(*playlist, sep = "\n")
 
 # 
@@ -93,39 +97,44 @@ print(*playlist, sep = "\n")
 # create list of objects using class Track
 tracks = []
 qty = len(playlist)
-print(qty)    #86
+#print(qty)    #86
 for i in range(1,qty):
     tracks.append("Track" + str(i))
-print(tracks)
+print("=========================================================")
+print("this is tracks:")
+print(*tracks, sep = "\n")
 
 for idx, val in enumerate(tracks):
     val = Track(playlist[idx]['Folder'], playlist[idx]['Artist'], playlist[idx]['Album'], playlist[idx]['Title'])
     #print(idx, val.folder)
 
-#test = playlist[0]['Folder']
+# test = playlist[0]['Folder']
 # test = track73.getattr()
-print(type(tracks[6]))
-thetrack = Track('FOLDER', 'ARTIST', 'ALBUM', 'TITLE')
-print(getattr(thetrack, 'folder'))
-print(type(thetrack))
+# print(type(tracks[6]))
+# thetrack = Track('FOLDER', 'ARTIST', 'ALBUM', 'TITLE')
+# print(getattr(thetrack, 'folder'))
+# print(type(thetrack))
 
 #objs = [Track() for i in range(qty)]
 
 
-objs = list()
+objs = []
 for idx in range(qty):
     objs.append(Track(playlist[idx]['Folder'], playlist[idx]['Artist'], playlist[idx]['Album'], playlist[idx]['Title']))
-print(objs)
+
+# print("=========================================================")
+# print("this isobjs)
 
 
-for obj in objs:
-    print(obj)
+# print("=========================================================")
+# for obj in objs:
+#     print("this is for loop objs:" + obj)
 
 
 def create_connection(db_name, db_user, db_password, db_host, db_port):
     connection = None
     try:
-        connection = psycop2.connect(
+        connection = psycopg2.connect(
             database=db_name,
             user=db_user,
             password=db_password,
@@ -137,4 +146,92 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
         print(f"The error '{e}' occured")
     return connection
 
-    
+# Connect to default database
+connection = create_connection(
+    "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
+)
+
+# Create new db in postgresql db server
+def create_database(connection, query):
+    connection.autocommit = True
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        print("Query executed successfully")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
+
+def execute_query(connection, query):
+    connection.autocommit = True
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        print("Query executed successfully")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
+
+cur = connection.cursor()
+
+cur.execute("SELECT datname FROM pg_database;")
+
+list_database = cur.fetchall()
+
+database_name = input('Enter database name to check exist or not: ')
+
+if (database_name,) in list_database:
+    print("'{}' Database already exist".format(database_name))
+else:
+    print("'{}' Database not exist.".format(database_name))
+    create_database_query = "CREATE DATABASE playlist"
+    create_database(connection, create_database_query)
+connection.close()
+print('Done')
+
+
+
+# Connect to playlist database based on create_database_query above
+connection = create_connection(
+    "playlist", "postgres", "iguana90", "127.0.0.1", "5432"
+)
+
+create_playlist_table = """
+CREATE TABLE IF NOT EXISTS Q_m3u8 (
+  tracknumber integer,
+  artist character (20), 
+  album character (20),
+  title character (20)
+)
+"""
+execute_query(connection, create_playlist_table)
+
+
+# users = [
+#     ("James", 25, "male", "USA"),
+#     ("Leila", 32, "female", "France"),
+#     ("Brigitte", 35, "female", "England"),
+#     ("Mike", 40, "male", "Denmark"),
+#     ("Elizabeth", 21, "female", "Canada"),
+# ]
+
+
+userstest = [
+    (25, "male", "USA","asdf"),
+    (32, "female", "France","asdf"),
+    (35, "female", "England","asdf"),
+    (40, "male", "Denmark","asdf"),
+    (21, "female", "Canada","asdf"),
+]
+
+user_records = ", ".join(["%s"] * len(userstest))           #?????????
+insert_query = (
+    f"INSERT INTO Q_m3u8 (tracknumber, artist, album, title) VALUES {user_records}"
+)
+
+connection.autocommit = True
+cursor = connection.cursor()
+cursor.execute(insert_query, userstest)
+
+# clean
+# separate different data organizations
+# separate sql
+# separate Track class
