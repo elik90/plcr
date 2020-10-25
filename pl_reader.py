@@ -10,7 +10,7 @@ from psycopg2 import OperationalError
 # Improvements: 
 # - Pull object attributes individually
 # - Use SQL to create DB given any form of data (OO, list of dictionaries, pandas df)
-# - Tuple and Pandas Dataframe
+# - Pandas Dataframe
 # - strip ext and track number
 
 ext = ('.mp3', '.wav', '.flac', '.aac', '.ogg')
@@ -41,21 +41,21 @@ print(*audio_lines, sep = "\n")
 # Using audio_lines, create playlist list of track dictionaries
 playlist = []
 for line in audio_lines:
-    track_dict = {'Folder' : '', 'Artist' : '', 'Album' : '', 'Title' : ''}
+    track_dict = {'folder' : '', 'artist' : '', 'album' : '', 'title' : ''}
     path, title = os.path.split(line)
     path_short = path.replace('primary/Music/PowerAmpP/', '')
-    track_dict['Title'] = title
-    track_dict['Folder'] = path_short
+    track_dict['title'] = title
+    track_dict['folder'] = path_short
     regex = r"^(.*)\s-\s(.*)"
     #regex = "^(.*)?-(.*)"
     matches = re.match(regex, path_short)
     if matches != None:
-        track_dict['Artist'] = matches.group(1)
-        track_dict['Album'] = matches.group(2)
+        track_dict['artist'] = matches.group(1)
+        track_dict['album'] = matches.group(2)
     else:
-        print("{}*****FIX THIS*****".format(track_dict['Folder']))
-        track_dict['Artist'] = "unknown"
-        track_dict['Album'] = "unknown"
+        print("{}*****FIX THIS*****".format(track_dict['folder']))
+        track_dict['artist'] = "unknown"
+        track_dict['album'] = "unknown"
         
     playlist.append(track_dict)
 print("========== playlist:")
@@ -66,7 +66,7 @@ qty = len(playlist)
 print("==========tracks:")
 objs = []
 for int in range(qty):
-    objs.append(Track(playlist[int]['Folder'], playlist[int]['Artist'], playlist[int]['Album'], playlist[int]['Title']))
+    objs.append(Track(playlist[int]['folder'], playlist[int]['artist'], playlist[int]['album'], playlist[int]['title']))
     print("{}. {} ".format(int, objs[int]))
 
 
@@ -82,14 +82,9 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
             port=db_port,
         )
         print("Connection to PostgreSQL DB successful")
-    except OperationError as e:
+    except OperationalError as e:
         print(f"The error '{e}' occured")
     return connection
-
-# Connect to default database
-connection = create_connection(
-    "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
-)
 
 # Create new db in postgresql db server
 def create_database(connection, query):
@@ -110,68 +105,60 @@ def execute_query(connection, query):
     except OperationalError as e:
         print(f"The error '{e}' occurred")
 
-cur = connection.cursor()
+def execute_db_check(connection, query):
+    connection.autocommit = True
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        list_database = cursor.fetchall()
+        print(list_database)
+        if 'playlists' in list_database:
+            print("'{}' Database already exists".format("playlists"))
+            return True
+        else:
+            print("'{}' Database does not exist.".format("playlists"))
+            return False
+            
 
-cur.execute("SELECT datname FROM pg_database;")
+    except OperationalError as e:
+        print(f"The error '{e}' occurred")
 
-list_database = cur.fetchall()
 
-database_name = input('Enter database name to check exist or not: ')
+# Connect to default database
+connection = create_connection(
+    "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
+)
+db_check_query = ("SELECT datname FROM pg_database;")
+execute_db_check(connection, db_check_query)
 
-if (database_name,) in list_database:
-    print("'{}' Database already exist".format(database_name))
-else:
-    print("'{}' Database not exist.".format(database_name))
-    create_database_query = "CREATE DATABASE playlist"
+if execute_db_check is True:
+    create_database_query = "CREATE DATABASE playlists"
     create_database(connection, create_database_query)
-connection.close()
-print('Done')
+else:
 
+#if db_check_query is True:
+
+    print('Done')
 
 
 # Connect to playlist database based on create_database_query above
-connection = create_connection(
-    "playlist", "postgres", "iguana90", "127.0.0.1", "5432"
-)
+connection = create_connection("playlists", "postgres", "iguana90", "127.0.0.1", "5432")
 
 create_playlist_table = """
-CREATE TABLE IF NOT EXISTS Q_m3u8 (
-  tracknumber integer,
-  artist character (20), 
-  album character (20),
-  title character (20)
+CREATE TABLE IF NOT EXISTS Tracks (
+  Folder character (90),
+  Artist character (90), 
+  Album character (90),
+  Title character (90)
 )
 """
 execute_query(connection, create_playlist_table)
 
-
-# users = [
-#     ("James", 25, "male", "USA"),
-#     ("Leila", 32, "female", "France"),
-#     ("Brigitte", 35, "female", "England"),
-#     ("Mike", 40, "male", "Denmark"),
-#     ("Elizabeth", 21, "female", "Canada"),
-# ]
-
-
-userstest = [
-    (25, "male", "USA","asdf"),
-    (32, "female", "France","asdf"),
-    (35, "female", "England","asdf"),
-    (40, "male", "Denmark","asdf"),
-    (21, "female", "Canada","asdf"),
-]
-
-user_records = ", ".join(["%s"] * len(userstest))           #?????????
-insert_query = (
-    f"INSERT INTO Q_m3u8 (tracknumber, artist, album, title) VALUES {user_records}"
-)
-
-connection.autocommit = True
-cursor = connection.cursor()
-cursor.execute(insert_query, userstest)
-
-# clean
-# separate different data organizations
-# separate sql
-# separate Track class
+# "awefawef"
+for trackdict in playlist:
+    columns = ', '.join(str(x).replace('/','_').replace('\'','') for x in trackdict.keys())
+    values = ', '.join("'" + str(x).replace('/', '_').replace('\'','') + "'" for x in trackdict.values())
+    sql = "INSERT INTO %s ( %s ) VALUES ( %s )" % ('Tracks', columns, values)
+    connection.autocommit = True
+    cursor = connection.cursor()
+    cursor.execute(sql)
