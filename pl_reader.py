@@ -1,8 +1,10 @@
 import os.path
-import pandas as pd
+
 import re
 import psycopg2
 from psycopg2 import OperationalError
+import pandas as pd
+
 from spotify_client import *
 
 # Script to open m3u8 files and organize by folder, artist, album, title

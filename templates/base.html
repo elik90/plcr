@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}PLaylist CReator{% endblock %}</title>
+        <style>
+            h1 {color:red}
+        </style>
+    </head>
+    
+    <body>
+        {% include 'navbar.html' %}
+        {% block content %}
+        {% endblock content %}
+
+
+        {% block js %}
+        {% endblock js %}
+    </body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+Playlists - {{ block.super }}
+{% endblock %}
+
+{% block content %}
+
+{% for object in object_list %}
+    <div>
+        {{ object.title }}
+        {% include 'playlists/detail_snippet.html' with playlist=object %}
+
+    </div>
+{% endfor %}
+
+
+
+{% endblock %}
