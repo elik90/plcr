@@ -1,11 +1,12 @@
 import os.path
-
 import re
 import psycopg2
-from psycopg2 import OperationalError
+import csv
 import pandas as pd
 
+from psycopg2 import OperationalError
 from spotify_client import *
+from pl_format import *
 
 # Script to open m3u8 files and organize by folder, artist, album, title
 # Built using Python 3.8 & PostgreSQL 13
@@ -16,7 +17,7 @@ from spotify_client import *
 # - Pandas Dataframe
 # - strip ext and track number
 
-ext = ('.mp3', '.wav', '.flac', '.aac', '.ogg')
+
 
 class Track:
     def __init__(self, folder, artist, album, title):
@@ -32,14 +33,20 @@ class Track:
 
 # Accept user input m3u8 file and list strings with audio file extentions in audio_lines list
 file_name = input("Enter the full file path for the m3u8 file you wish to create an SQL DB:  \n> ")
-with open(file_name) as input_file:
-    playlist_byline = input_file.read().splitlines()
-    audio_lines = []
-for line in playlist_byline:
-    if line.endswith(ext):
-        audio_lines.append(line)
-print("==========audio_lines:")
-print(*audio_lines, sep = "\n") 
+# with open(file_name) as input_file:
+#     playlist_byline = input_file.read().splitlines()
+#     audio_lines = []
+# for line in playlist_byline:
+#     if line.endswith(ext):
+#         audio_lines.append(line)
+# print("==========audio_lines:")
+# print(*audio_lines, sep = "\n") 
+
+asdf = Playlist(file_name)
+print(asdf.name)
+asdf.create_audio_lines()
+
+
 
 # Using audio_lines, create playlist list of track dictionaries
 playlist = []
@@ -157,7 +164,6 @@ CREATE TABLE IF NOT EXISTS Tracks (
 """
 execute_query(connection, create_playlist_table)
 
-# "awefawef"
 for trackdict in playlist:
     columns = ', '.join(str(x).replace('/','_').replace('\'','') for x in trackdict.keys())
     values = ', '.join("'" + str(x).replace('/', '_').replace('\'','') + "'" for x in trackdict.values())

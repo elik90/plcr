@@ -119,10 +119,10 @@ class SpotifyAPI(object):
         print(query_params)
         return self.base_search(query_params)
 
-spotify = SpotifyAPI(client_id, client_secret)
-search_result = spotify.search({"track":"A lannister always pays his debts", "artist": "Ramin"}, search_type="track")
-#search_result2 = spotify.get_album("4ZDwEvXIKxWdwhAQK8ndBU")
-print(search_result)
+# spotify = SpotifyAPI(client_id, client_secret)
+# search_result = spotify.search({"track":"A lannister always pays his debts", "artist": "Ramin"}, search_type="track")
+# #search_result2 = spotify.get_album("4ZDwEvXIKxWdwhAQK8ndBU")
+# print(search_result)
 
 
 

@@ -18,16 +18,19 @@ from django.urls import path
 
 # from playlists import views... not advantageous if importing views from other apps
 from playlists.views import (
-    home_view,
+    playlist_create_view,
+    search_view,
     playlist_detail_view,
     playlist_list_view
 )
 
 
 urlpatterns = [
-    path('search/', home_view),
-    path('playlists/<int:pk>/', playlist_detail_view),
+
+    path('search/', search_view),
     path('playlists/', playlist_list_view),
+    path('playlists/create/', playlist_create_view),
+    path('playlists/<int:pk>/', playlist_detail_view),
     # path('playlists/1/', views.playlist_detail_view),
     path('admin/', admin.site.urls),
 ]
