@@ -1,5 +1,3 @@
-import os.path
-import re
 import psycopg2
 import csv
 import pandas as pd
@@ -17,68 +15,21 @@ from pl_format import *
 # - Pandas Dataframe
 # - strip ext and track number
 
-
-
-class Track:
-    def __init__(self, folder, artist, album, title):
-        self.folder = folder
-        self.artist = artist
-        self.album = album
-        self.title = title    
-        #print(self.artist + " - " + self.album + " - " + self.title)
-
-    def __str__(self):
-        # Returns formatted track description
-        return '{} - {} - {}'.format(self.artist, self.album, self.title)
-
 # Accept user input m3u8 file and list strings with audio file extentions in audio_lines list
 file_name = input("Enter the full file path for the m3u8 file you wish to create an SQL DB:  \n> ")
-# with open(file_name) as input_file:
-#     playlist_byline = input_file.read().splitlines()
-#     audio_lines = []
-# for line in playlist_byline:
-#     if line.endswith(ext):
-#         audio_lines.append(line)
-# print("==========audio_lines:")
-# print(*audio_lines, sep = "\n") 
 
-asdf = Playlist(file_name)
-print(asdf.name)
-asdf.create_audio_lines()
+pl = Playlist(file_name)
+print(pl.name)
 
+pl.create_audio_lines()
+pl.cleanup_path()
+print(*pl.audio_lines, sep = '\n')
 
+pl.create_playlist()
+print(*pl.playlist, sep = '\n')
 
-# Using audio_lines, create playlist list of track dictionaries
-playlist = []
-for line in audio_lines:
-    track_dict = {'folder' : '', 'artist' : '', 'album' : '', 'title' : ''}
-    path, title = os.path.split(line)
-    path_short = path.replace('primary/Music/PowerAmpP/', '')
-    track_dict['title'] = title
-    track_dict['folder'] = path_short
-    regex = r"^(.*)\s-\s(.*)"
-    #regex = "^(.*)?-(.*)"
-    matches = re.match(regex, path_short)
-    if matches != None:
-        track_dict['artist'] = matches.group(1)
-        track_dict['album'] = matches.group(2)
-    else:
-        print("{}*****FIX THIS*****".format(track_dict['folder']))
-        track_dict['artist'] = "unknown"
-        track_dict['album'] = "unknown"
-        
-    playlist.append(track_dict)
-print("========== playlist:")
-print(*playlist, sep = "\n")
-
-# create list of objects using class Track
-qty = len(playlist)
-print("==========tracks:")
-objs = []
-for int in range(qty):
-    objs.append(Track(playlist[int]['folder'], playlist[int]['artist'], playlist[int]['album'], playlist[int]['title']))
-    print("{}. {} ".format(int, objs[int]))
-
+pl.create_tracks()
+print(pl.objs)
 
 # SQL Implementation
 def create_connection(db_name, db_user, db_password, db_host, db_port):
