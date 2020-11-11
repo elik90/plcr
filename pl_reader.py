@@ -2,7 +2,7 @@ import pandas as pd
 
 from spotify_client import *
 from pl_format import *
-#from dbcontrol.py import *
+from dbcontrol import *
 
 # Script to open m3u8 files and organize by folder, artist, album, title
 # Built using Python 3.8 & PostgreSQL 13
@@ -22,25 +22,34 @@ pl = Playlist(file_name)
 
 pl.create_audio_lines()
 pl.cleanup_path()
-#print(*pl.audio_lines, sep = '\n')
-
 pl.create_playlist()
-#print(*pl.playlist, sep = '\n')
-
 pl.create_tracks()
-
-#pl.list_tracks()
-
-# for v in enumerate(pl.objs):
-#     print(pl.objs[v]['album'])
-
-# print(pl.objs[1].album)
-# print(pl.playlist[0]['artist'])
-
 pl.save()
 
-# for k, v in enumerate(pl.objs):
-#     print(v.artist, v.album, v.title)
+# Connect to default database
+default_connection()
+connection = connection_playlist()
+cleanup_tables()
+create_table_playlist_names()
+create_table_tracks()
 
-# for k,v in enumerate(pl.playlist):
-#     print(pl.playlist[k]["artist"])
+# populate 'tracks' table 
+for trackdict in pl.playlist:
+    columns = ', '.join(str(x).replace('/','_').replace('\'','') for x in trackdict.keys())
+    values = ', '.join("'" + str(x).replace('/', '_').replace('\'','') + "'" for x in trackdict.values())
+    sql = "INSERT INTO %s ( %s ) VALUES ( %s )" % ('Tracks', columns, values)
+    execute_query(connection, sql)
+
+# populate 'playlist_names' table
+sql = "INSERT INTO Playlist_Names (name) VALUES (\'%s\')" % (pl.name)
+execute_query(connection, sql)
+
+# set foreign key for tracks playlist_id to 'playlist_names' (id)
+sql = """
+UPDATE tracks
+SET playlist_id = 1
+"""
+execute_query(connection, sql)
+
+# close pgsql connection
+connection.close()

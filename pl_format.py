@@ -72,3 +72,4 @@ class Playlist:
             playlist_csv = csv.writer(csv_file, delimiter=',')
             for v in self.objs:
                 playlist_csv.writerow([v.artist, v.album, v.title])
+        print("{} has been generated at {}".format(csv_name, path))

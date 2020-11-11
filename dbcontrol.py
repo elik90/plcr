@@ -1,7 +1,7 @@
 import psycopg2
 
 from psycopg2 import OperationalError
-
+from pl_format import *
 
 # SQL Implementation
 def create_connection(db_name, db_user, db_password, db_host, db_port):
@@ -25,7 +25,7 @@ def create_database(connection, query):
     cursor = connection.cursor()
     try:
         cursor.execute(query)
-        print("Query executed successfully")
+        print("Create db query executed successfully")
     except OperationalError as e:
         print(f"The error '{e}' occurred")
 
@@ -34,7 +34,7 @@ def execute_query(connection, query):
     cursor = connection.cursor()
     try:
         cursor.execute(query)
-        print("Query executed successfully")
+        print("Execute... {} ...executed successfully\n".format(query))
     except OperationalError as e:
         print(f"The error '{e}' occurred")
 
@@ -45,52 +45,62 @@ def execute_db_check(connection, query):
         cursor.execute(query)
         list_database = cursor.fetchall()
         print(list_database)
-        if 'playlists' in list_database:
+        db_name = 'playlists'
+        if (db_name,) in list_database:
             print("'{}' Database already exists".format("playlists"))
             return True
         else:
             print("'{}' Database does not exist.".format("playlists"))
             return False
-            
-
     except OperationalError as e:
         print(f"The error '{e}' occurred")
 
-
-# Connect to default database
-connection = create_connection(
+def default_connection():
+    connection = create_connection(
     "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
-)
-db_check_query = ("SELECT datname FROM pg_database;")
-execute_db_check(connection, db_check_query)
+    )
+    db_check_query = ("SELECT datname FROM pg_database;")
+    dbcheckbool = execute_db_check(connection, db_check_query)
+    print(dbcheckbool)
+    db_name = 'playlists'
 
-if execute_db_check is True:
-    create_database_query = "CREATE DATABASE playlists"
-    create_database(connection, create_database_query)
-else:
+    if execute_db_check == False:
+        create_database_query = "CREATE DATABASE {}".format(db_name)
+        create_database(connection, create_database_query)
+    else:
+        print('database {} already exists. skipping creation...'.format(db_name))
+  
+def cleanup_tables():
+    # cur.execute("select exists(select * from information_schema.tables where table_name=%s)", ('playlist',))
+    # cur.fetchone()[0]
+    delete_tables = """
+    DROP TABLE IF EXISTS tracks, playlist_names
+    """
+    execute_query(connection_playlist(), delete_tables)
 
-#if db_check_query is True:
+def connection_playlist():
+    connection = create_connection("playlists", "postgres", "iguana90", "127.0.0.1", "5432")
+    return connection
 
-    print('Done')
+def create_table_playlist_names():
+    create_playlist_table = """
+    CREATE TABLE Playlist_Names (
+    id SMALLSERIAL PRIMARY KEY,
+    name character (90)
+    )
+    """
+    execute_query(connection_playlist(), create_playlist_table)
 
 
-# Connect to playlist database based on create_database_query above
-connection = create_connection("playlists", "postgres", "iguana90", "127.0.0.1", "5432")
-
-create_playlist_table = """
-CREATE TABLE IF NOT EXISTS Tracks (
-  Folder character (90),
-  Artist character (90), 
-  Album character (90),
-  Title character (90)
-)
-"""
-execute_query(connection, create_playlist_table)
-
-for trackdict in playlist:
-    columns = ', '.join(str(x).replace('/','_').replace('\'','') for x in trackdict.keys())
-    values = ', '.join("'" + str(x).replace('/', '_').replace('\'','') + "'" for x in trackdict.values())
-    sql = "INSERT INTO %s ( %s ) VALUES ( %s )" % ('Tracks', columns, values)
-    connection.autocommit = True
-    cursor = connection.cursor()
-    cursor.execute(sql)
+def create_table_tracks():
+    create_playlist_table = """
+    CREATE TABLE IF NOT EXISTS Tracks (
+    track_id SMALLSERIAL PRIMARY KEY,
+    Folder character (90),
+    Artist character (90), 
+    Album character (90),
+    Title character (90),
+    playlist_id integer REFERENCES playlist_names (id)
+    )
+    """
+    execute_query(connection_playlist(), create_playlist_table)
