@@ -25,3 +25,12 @@ class PlaylistModelForm(forms.ModelForm):
         if len(data) < 4:
             raise forms.ValidationError("This is not long enough")
         return data
+
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=50)
+    file = forms.FileField()
+
+class PlaylistForm(forms.ModelForm):
+    class Meta:
+        model = Playlist
+        fields = ('title', 'filename')

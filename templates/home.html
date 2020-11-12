@@ -1,9 +1,36 @@
 {% extends "base.html" %}
 
 
+<h1>Playlist Database</h1>
 
 {% block content %}
-<h1>hello wefwefwef world! {{name}}</h1>  
+<a href="{% url 'upload' %}">upload .m3u8 file</a><br/>
+<h2>Uploaded Files:</h2>
+<a href="{% url 'upload_playlist' %}">upload playlist</a><br/>
+<a href="{% url 'playlist_list' %}">playlist list</a><br/>
+
+<h2>Playlists:</h2>
+{% for playlist in playlists %}
+    <table class='table'>
+        <thead>
+            Title: {{ playlist.title }}
+        </thead>
+        <tbody>
+            <tr>
+                <th>
+                    <td>
+                        Filename: {{ playlist.filename }}<br/>
+                    </td>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+{% endfor %}
+<!---->
+<p> raw playlist objects {{ playlists }}</p>
+
+
 {% endblock %}
 
 

@@ -1,7 +1,14 @@
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render, redirect
+from django.core.files.storage import FileSystemStorage
 
-from .forms import PlaylistModelForm
+#from .forms import PlaylistModelForm
+from .forms import (
+    PlaylistModelForm,
+    UploadFileForm,
+    PlaylistForm
+)
+
 from .models import Playlist
 # Create your views here.
 def search_view(request, *args, **kwargs):
@@ -53,5 +60,58 @@ def playlist_list_view(request, *args, **kwargs):
     context = {"object_list": qs}
     return render(request, "playlists/list.html", context)
 
-# class HomeView():
-#     pass
+
+
+
+#########################################################################
+def home_view(request):
+    all_playlists = Playlist.objects.all()
+    return render(request, 'home.html', {'playlists':all_playlists})
+
+
+# def upload_file(request):
+#     if request.method == 'POST':
+#         form = UploadFileForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             handle_uploaded_file(request.FILES['file'])
+#             return HttpResponseRedirect('/success/url')
+#     else:
+#         form = UploadFileForm()
+#     return render(request, 'upload.html', {'form':form})
+
+# def handle_uploaded_file(f):
+#     with open('some/file/name.txt', 'wb+') as destination:
+#         for chunk in f.chunks():
+#             destination.write(chunk)
+
+def upload(request):
+    context = {}
+    if request.method == 'POST':
+        uploaded_file = request.FILES['document'] # document matches html input
+        fs = FileSystemStorage()
+        name = fs.save(uploaded_file.name, uploaded_file)
+        context['url'] = fs.url(name)
+    return render(request, 'upload.html', context)
+
+
+def playlist_list(request):
+    playlists = Playlist.objects.all()
+    return render(request, 'playlist_list.html', {
+        'playlists': playlists
+    })
+
+def upload_playlist(request):
+    if request.method == 'POST':
+        form = PlaylistForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('playlist_list')
+    else:
+        form = PlaylistForm()
+    return render(request, 'upload_playlist.html', {
+        'form': form
+    })
+
+
+
+

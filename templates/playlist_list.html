@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Playlist list</h2>
+
+    <p>
+        <a href="{% url 'upload_playlist' %}">upload playlist</a>
+    </p>
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for playlist in playlists %}
+                <tr>
+                    <td>{{ playlist.title }}</td>
+                    <td>{{ playlist.filename }}</td>
+                    <td>
+                        <a href="{{ playlist.filename.url }}" class="btn btn-primary btn-sm">
+                            Download playlist file
+                        </a>
+                    </td>
+                    <td>
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" name="generate_tracklist">Generate Tracklist</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
