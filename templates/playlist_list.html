@@ -21,17 +21,20 @@
                 <tr>
                     <td>{{ playlist.title }}</td>
                     <td>{{ playlist.filename }}</td>
-                    <td>
-                        <a href="{{ playlist.filename.url }}" class="btn btn-primary btn-sm">
+                    <td>{{ playlist.isgenerated }}</td>
+                    <a href="{{ playlist.filename.url }}" class="btn btn-primary btn-sm">
                             Download playlist file
                         </a>
-                    </td>
                     <td>
-                        <form method="post">
-                            {% csrf_token %}
-                            <button type="submit" name="generate_tracklist">Generate Tracklist</button>
-                        </form>
+                    <form action="{% url 'gtpl' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+                        <button type="submit">Generate Tracklist</button>
+                        is generated: {{ playlist.isgenerated }}
+                    </form>
+                        
                     </td>
+                    
                 </tr>
             {% endfor %}
         </tbody>

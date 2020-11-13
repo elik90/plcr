@@ -6,31 +6,17 @@ from django.core.files.storage import FileSystemStorage
 from .forms import (
     PlaylistModelForm,
     UploadFileForm,
-    PlaylistForm
+    PlaylistForm,
+    GenerateTracklistForm
 )
-
 from .models import Playlist
-# Create your views here.
+
 def search_view(request, *args, **kwargs):
     query = request.GET.get('q')
     qs = Playlist.objects.filter(title__icontains=query[0])
     print(query,qs)
     context = {"name":"Justin", "query": query}
     return render(request, "home.html", context)
-
-# def playlist_create_view(request, *args, **kwargs):
-#     # print(request.POST)
-#     # print(request.GET)
-#     if request.method == "POST":
-#         post_data = request.POST or None
-#         if post_data != None:
-#             my_form = PlaylistForm(request.POST)
-#             if my_form.is_valid():
-#                 print(my_form.cleaned_data.get("title"))
-#                 title_from_input = my_form.cleaned_data.get("title")
-#                 Playlist.objects.create(title=title_from_input)
-#                 #print("post_data", post_data)
-#     return render(request, "forms.html", {})
 
 def playlist_create_view(request, *args, **kwargs):
     form = PlaylistModelForm(request.POST or None)
@@ -59,9 +45,6 @@ def playlist_list_view(request, *args, **kwargs):
     qs = Playlist.objects.all()
     context = {"object_list": qs}
     return render(request, "playlists/list.html", context)
-
-
-
 
 #########################################################################
 def home_view(request):
@@ -93,12 +76,30 @@ def upload(request):
         context['url'] = fs.url(name)
     return render(request, 'upload.html', context)
 
-
 def playlist_list(request):
-    playlists = Playlist.objects.all()
+    playlists = Playlist.objects.all().order_by('id')
     return render(request, 'playlist_list.html', {
         'playlists': playlists
     })
+
+def gtpl(request):
+    if request.method == 'POST':
+        print("in gtpl")
+        playlist_id = request.POST.get('playlist_id')
+        print(playlist_id)
+        playlist_obj = Playlist.objects.get(id=playlist_id)
+        print(playlist_obj)
+        if playlist_obj.isgenerated == False:
+            playlist_obj.isgenerated = True
+        else:
+            playlist_obj.isgenerated = False
+        playlist_obj.save()
+        return redirect('playlist_list')
+    # else:
+    #     return redirect('')
+
+
+
 
 def upload_playlist(request):
     if request.method == 'POST':
@@ -111,7 +112,3 @@ def upload_playlist(request):
     return render(request, 'upload_playlist.html', {
         'form': form
     })
-
-
-
-

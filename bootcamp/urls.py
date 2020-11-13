@@ -27,7 +27,8 @@ from playlists.views import (
     home_view,
     upload,
     playlist_list,
-    upload_playlist
+    upload_playlist,
+    gtpl
 )
 
 
@@ -42,7 +43,8 @@ urlpatterns = [
     path('', home_view),
     path('upload/', upload, name='upload'),
     path('playlist/list/', playlist_list, name='playlist_list'),
-    path('playlist/upload/', upload_playlist, name='upload_playlist')
+    path('playlist/upload/', upload_playlist, name='upload_playlist'),
+    path('gtpl', gtpl, name='gtpl')
 ]
 
 if settings.DEBUG:

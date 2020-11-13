@@ -34,3 +34,9 @@ class PlaylistForm(forms.ModelForm):
     class Meta:
         model = Playlist
         fields = ('title', 'filename')
+
+class GenerateTracklistForm(forms.ModelForm):
+    class Meta:
+        model = Playlist
+        fields = ('isgenerated',)
+        
