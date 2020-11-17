@@ -64,7 +64,7 @@ def default_connection():
     print(dbcheckbool)
     db_name = 'playlists'
 
-    if execute_db_check == False:
+    if dbcheckbool == False:
         create_database_query = "CREATE DATABASE {}".format(db_name)
         create_database(connection, create_database_query)
     else:

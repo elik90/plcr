@@ -1,6 +1,6 @@
 import pandas as pd
 
-from spotify_client import *
+#from spotify_client import *
 from pl_format import *
 from dbcontrol import *
 

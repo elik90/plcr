@@ -9,7 +9,10 @@ from .forms import (
     PlaylistForm,
     GenerateTracklistForm
 )
-from .models import Playlist
+from .models import (
+    Playlist,
+    Track
+)
 
 def search_view(request, *args, **kwargs):
     query = request.GET.get('q')
@@ -84,13 +87,17 @@ def playlist_list(request):
 
 def gtpl(request):
     if request.method == 'POST':
-        print("in gtpl")
         playlist_id = request.POST.get('playlist_id')
-        print(playlist_id)
         playlist_obj = Playlist.objects.get(id=playlist_id)
-        print(playlist_obj)
         if playlist_obj.isgenerated == False:
             playlist_obj.isgenerated = True
+            playlist_obj.generate_tracklist()
+            created_pl = playlist_obj.create_playlist()
+            qty = len(created_pl)
+            objs = []
+            for int in range(qty):
+                objs.append(Track(int, created_pl[int]['folder'], created_pl[int]['artist'], created_pl[int]['album'], created_pl[int]['title']))
+                objs[int].save(['folder', 'artist', 'album', 'title'])
         else:
             playlist_obj.isgenerated = False
         playlist_obj.save()
