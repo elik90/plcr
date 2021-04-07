@@ -36,13 +36,13 @@ def execute_query(connection, query):
         print(f"The error '{e}' occurred")
 
 connection = create_connection(
-    "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
+    "postgres", "postgres", "PLACEHOLDER", "127.0.0.1", "5432"
 )
 create_database_query = "CREATE DATABASE sm_app"
 create_database(connection, create_database_query)
 
 connection = create_connection(
-    "sm_app", "postgres", "iguana90", "127.0.0.1", "5432"
+    "sm_app", "postgres", "PLACEHOLDER", "127.0.0.1", "5432"
 )
 
 
