@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 
 import requests
 
-client_id = "aa21a3bf7682401495bd2e70b3538cc4"
-client_secret = "8426b7679f554cf0b19a62da1e16f6b0"
+client_id = "PLACEHOLDER"
+client_secret = "PLACEHOLDER"
 
 class SpotifyAPI(object):
     access_token = None
@@ -119,10 +119,7 @@ class SpotifyAPI(object):
         print(query_params)
         return self.base_search(query_params)
 
-# spotify = SpotifyAPI(client_id, client_secret)
-# search_result = spotify.search({"track":"A lannister always pays his debts", "artist": "Ramin"}, search_type="track")
-# #search_result2 = spotify.get_album("4ZDwEvXIKxWdwhAQK8ndBU")
-# print(search_result)
+
 
 
 
