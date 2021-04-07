@@ -59,7 +59,7 @@ def execute_db_check(connection, query):
 
 # Connect to default database
 connection = create_connection(
-    "postgres", "postgres", "iguana90", "127.0.0.1", "5432"
+    "postgres", "postgres", "PLACEHOLDER", "127.0.0.1", "5432"
 )
 db_check_query = ("SELECT datname FROM pg_database;")
 execute_db_check(connection, db_check_query)
@@ -75,7 +75,7 @@ else:
 
 
 # Connect to playlist database based on create_database_query above
-connection = create_connection("playlists", "postgres", "iguana90", "127.0.0.1", "5432")
+connection = create_connection("playlists", "postgres", "PLACEHOLDER", "127.0.0.1", "5432")
 
 create_playlist_table = """
 CREATE TABLE IF NOT EXISTS Tracks (
